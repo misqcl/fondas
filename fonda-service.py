@@ -143,6 +143,24 @@ def opiniones_fonda(content):
     finally:
         conn.close()
 
+# Listar usuarios
+def listar_usuarios(content):
+    try:
+        conn = sqlite3.connect("fondas.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id, nombre, apellido, fonda_id, rol FROM usuarios")
+        users = cursor.fetchall()
+
+        if users:
+            return {'status': 'success', 'users': [{'id': f[0], 'nombre': f[1], 'apellido': f[2], 'fonda_id': f[3], 'rol': f[4]} for f in users]}
+        else:
+            return {'status': 'success', 'users': []}
+    except Exception as e:
+        return {'status': 'failure', 'message': str(e)}
+    finally:
+        conn.close()
+        
 # Servicio principal
 def run_service(s: service.Service):
     s.sinit()  # Inicializar el servicio con el bus
@@ -159,6 +177,8 @@ def run_service(s: service.Service):
             response_content = eliminar_fonda(request.content)
         elif action == 'view_sales':
             response_content = ver_ventas(request.content)
+        elif action == 'all_users':
+            response_content = listar_usuarios(request.content)
         elif action == 'view_opinions':
             response_content = opiniones_fonda(request.content)
         else:

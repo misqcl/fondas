@@ -68,7 +68,24 @@ def listar_fondas(c: client.Client):
         fondas = response.content.get('fondas', [])
         if fondas:
             for f in fondas:
-                print(f"ID: {f['id']}, Nombre: {f['nombre']}, Mesas: {f['mesas']}")
+                print(f"ID: {f['id']}, Nombre: {f['nombre']}, Mesas: {f['mesas']}, Calificación: {f['calificacion']}")
+        else:
+            print("No hay fondas registradas.")
+    else:
+        print("Error:", response.content.get('message'))
+
+def fonda_op(c: client.Client):
+
+    request_content = {'action': 'list'}
+    request = client.Request('fonda', request_content)
+    c.send(request)  # Enviar solicitud al bus
+
+    response = c.receive()  # Recibir respuesta del bus
+    if response.content.get('status') == 'success':
+        fondas = response.content.get('fondas', [])
+        if fondas:
+            for f in fondas:
+                print(f"Fonda: {f['nombre']}, Mesas: {f['mesas']}, Calificación: {f['calificacion']}")
         else:
             print("No hay fondas registradas.")
     else:
@@ -242,39 +259,25 @@ def eliminar_operador(c: client.Client):
     else:
         print("Error:", response.content.get('message'))
 
+def ver_users(c: client.Client):
+    print("\n--- Listado de Usuarios ---")
 
-def menu_admin(c: client.Client):
-    while True:
-        print("\n--- Menú de Administrador ---")
-        print("1. Crear fonda")
-        print("2. Ver listado de fondas")
-        print("3. Eliminar fonda")
-        print("4. Crear operador")
-        print("5. Ver listado de operadores")
-        print("6. Eliminar operador")
-        print("7. Ver ventas")
-        print("8. Cerrar sesión")
-        opcion = input("Seleccione una opción: ")
+    request_content = {'action': 'all_users'}
+    request = client.Request('fonda', request_content)
+    c.send(request)  # Enviar solicitud al bus
 
-        if opcion == "1":
-            crear_fonda(c)
-        elif opcion == "2":
-            listar_fondas(c)
-        elif opcion == "3":
-            eliminar_fonda(c)
-        elif opcion == "4":
-            crear_operador(c)
-        elif opcion == "5":
-            listar_operadores(c)
-        elif opcion == "6":
-            eliminar_operador(c)
-        elif opcion == "7":
-            ver_ventas(c)
-        elif opcion == "8":
-            print("Cerrando sesión...")
-            break
+    response = c.receive()  # Recibir respuesta del bus
+    if response.content.get('status') == 'success':
+        users = response.content.get('users', [])
+        if users:
+            for f in users:
+                print(f"ID: {f['id']}, Nombre: {f['nombre']}, Apellido: {f['apellido']}, Fonda_Id: {f['fonda_id']}, Rol: {f['rol']}")
         else:
-            print("Opción no válida.")
+            print("No hay usuarios registrados.")
+    else:
+        print("Error:", response.content.get('message'))
+
+
 def iniciar_sesion(c: client.Client):
     print("\n--- Inicio de Sesión ---")
     username = input("Nombre de usuario: ")
@@ -951,6 +954,7 @@ def menu_usuario(c: client.Client, usuario_id):
 def menu_operador(c: client.Client, user_fonda_id):
     while True:
         print("\n--- Menú de Operador ---")
+        fonda_op(c)
         print("1. Gestionar inventario")
         print("2. Gestionar promociones")
         print("3. Gestionar mesas")
@@ -994,5 +998,40 @@ def menu_normal():
             print("Opción no válida.")
     c.close()
 
+def menu_admin(c: client.Client):
+    while True:
+        print("\n--- Menú de Administrador ---")
+        print("1. Crear fonda")
+        print("2. Ver listado de fondas")
+        print("3. Eliminar fonda")
+        print("4. Crear operador")
+        print("5. Ver listado de operadores")
+        print("6. Eliminar operador")
+        print("7. Ver ventas")
+        print("8. Ver usuarios")
+        print("9. Cerrar sesión")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            crear_fonda(c)
+        elif opcion == "2":
+            listar_fondas(c)
+        elif opcion == "3":
+            eliminar_fonda(c)
+        elif opcion == "4":
+            crear_operador(c)
+        elif opcion == "5":
+            listar_operadores(c)
+        elif opcion == "6":
+            eliminar_operador(c)
+        elif opcion == "7":
+            ver_ventas(c)
+        elif opcion == "8":    
+            ver_users(c)
+        elif opcion == "9":
+            print("Cerrando sesión...")
+            break
+        else:
+            print("Opción no válida.")
 if __name__ == "__main__":
     menu_normal()
